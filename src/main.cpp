@@ -2,7 +2,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define IsProcessSnapshotCallback 16
-#define NtCurrentProcess() ( (HANDLE)(LONG_PTR) -1 )
+#define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
 #define NtCurrentThread() ((HANDLE)(LONG_PTR)-2)
 #define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
 #define STATUS_SUCCESS 0x00000000
