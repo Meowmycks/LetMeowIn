@@ -1,5 +1,5 @@
 # LetMeowIn
-A sophisticated, covert Windows-based credential dumper using C++ and MASM x64.
+A sophisticated, covert LSASS dumper using C++ and MASM x64.
 
 Historically was able to (and may presently still) bypass
   - Windows Defender
