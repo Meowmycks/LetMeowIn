@@ -1,9 +1,7 @@
 .data
-
 jumpAddress dq 0                    ; Variable to hold address of 'syscall-ret' trampoline
 
 .code
-
 SetJumpAddress proc                 ; Function to set jumpAddress
     mov [jumpAddress], rcx          ; Assume the new address is passed in RCX
     ret
