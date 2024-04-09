@@ -24,3 +24,4 @@ Avoids detection by using various means, such as:
 ## Negatives
   - Tools like Moneta and pe-sieve64 will detect changes made to NTDLL.dll from unhooking
   - Only works on x64 architecture
+  - Don't expect this to be undetectable forever 🙂
