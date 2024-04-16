@@ -1,14 +1,15 @@
 # LetMeowIn
 A sophisticated, covert LSASS dumper using C++ and MASM x64.
 
+## Disclaimer
+Don't be evil with this. I created this tool to learn. I'm not responsible if the Feds knock on your door.
+
 Historically was able to (and may presently still) bypass
   - Windows Defender
   - Malwarebytes Anti-Malware
   - CrowdStrike Falcon EDR
-  - Palo Alto Cortex xDR
 
-## Disclaimer
-Don't be evil with this. I created this tool to learn. I'm not responsible if the Feds knock on your door.
+![image](https://github.com/Meowmycks/LetMeowIn/assets/45502375/fb99f6e3-abb4-4beb-9130-dfbc550e1abe)
 
 ## Features
 Avoids detection by using various means, such as:
