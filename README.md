@@ -16,7 +16,7 @@ Historically was able to (and may presently still) bypass
 ## Features
 Avoids detection by using various means, such as:
   - Manually implementing NTAPI operations through indirect system calls
-  - Disabling telemetry features (i.e ETW)
+  - ~~Disabling~~ Breaking telemetry features (i.e ETW)
   - Polymorphism through compile-time hash generation
   - Obfuscating API function names and pointers
   - Duplicating existing LSASS handles instead of opening new ones
