@@ -16,7 +16,7 @@ Historically was able to (and may presently still) bypass
 ## Features
 Avoids detection by using various means, such as:
   - Manually implementing NTAPI operations through indirect system calls
-  - Disabling telemetry features (e.g. ETW and other EDR hooks)
+  - Disabling telemetry features (i.e ETW)
   - Polymorphism through compile-time hash generation
   - Obfuscating API function names and pointers
   - Duplicating existing LSASS handles instead of opening new ones
@@ -25,6 +25,5 @@ Avoids detection by using various means, such as:
   - Probably other stuff I forgot to mention here
 
 ## Negatives
-  - Tools like Moneta and pe-sieve64 will detect changes made to NTDLL.dll from unhooking
   - Only works on x64 architecture
   - Don't expect this to be undetectable forever 🙂
