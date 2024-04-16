@@ -7,7 +7,7 @@ Don't be evil with this. I created this tool to learn. I'm not responsible if th
 Historically was able to (and may presently still) bypass
   - Windows Defender
   - Malwarebytes Anti-Malware
-  - CrowdStrike Falcon EDR
+  - CrowdStrike Falcon EDR (Managed Mode + OverWatch)
 
 ![image](https://github.com/Meowmycks/LetMeowIn/assets/45502375/fb99f6e3-abb4-4beb-9130-dfbc550e1abe)
 
