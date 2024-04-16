@@ -4,6 +4,8 @@ A sophisticated, covert LSASS dumper using C++ and MASM x64.
 ## Disclaimer
 Don't be evil with this. I created this tool to learn. I'm not responsible if the Feds knock on your door.
 
+----------------------------------------------------------------------------------------------------------
+
 Historically was able to (and may presently still) bypass
   - Windows Defender
   - Malwarebytes Anti-Malware
