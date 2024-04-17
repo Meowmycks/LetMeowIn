@@ -26,4 +26,5 @@ Avoids detection by using various means, such as:
 
 ## Negatives
   - Only works on x64 architecture
+  - Relies on there being [existing opened LSASS handles](https://itm4n.github.io/lsass-runasppl/#technique-3--python--katz) on target systems 
   - Don't expect this to be undetectable forever 🙂
