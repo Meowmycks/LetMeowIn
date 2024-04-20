@@ -11,6 +11,7 @@
 #include <sddl.h>
 #include <processsnapshot.h>
 #include <dbghelp.h>
+#include <evntprov.h>
 
 #include "enums.h"
 #include "structs.h"
