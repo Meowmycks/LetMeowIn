@@ -1,6 +1,8 @@
 # LetMeowIn
 A sophisticated, covert LSASS dumper using C++ and MASM x64.
 
+As seen on [Binary Defense](https://www.binarydefense.com/resources/blog/letmeowin-analysis-of-a-credential-dumper/) and [Cyber Security News](https://cybersecuritynews.com/researchers-detailed-letmeowin-credentials/)
+
 ## Disclaimer
 Don't be evil with this. I created this tool to learn. I'm not responsible if the Feds knock on your door.
 
