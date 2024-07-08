@@ -12,8 +12,7 @@ Historically was able to (and may presently still) bypass
   - Windows Defender
   - Malwarebytes Anti-Malware
   - CrowdStrike Falcon EDR (Falcon Complete + OverWatch)
-  - Palo Alto Cortex xDR*
-    *(When combined with strong initial access methods)
+  - Palo Alto Cortex xDR *(When combined with strong initial access methods)*
 
 ![image](https://github.com/Meowmycks/LetMeowIn/assets/45502375/fb99f6e3-abb4-4beb-9130-dfbc550e1abe)
 
